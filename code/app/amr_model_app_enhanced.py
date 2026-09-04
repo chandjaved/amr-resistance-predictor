@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import joblib
-model = joblib.load('../../models/prediction_model_corrected.pkl')
+model = joblib.load('models/prediction_model_corrected.pkl')
 encoders = joblib.load('../../models/feature_encoders.pkl')
 
 def _safe_encode(le, value):
