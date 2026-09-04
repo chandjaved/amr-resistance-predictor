@@ -1,0 +1,116 @@
+{
+  "model_name": "AMR Predictor \u2014 XGBoost Classifier (WHO GLASS 2022 Edition)",
+  "model_type": "XGBClassifier",
+  "version": "2.0-real-data",
+  "unit_of_analysis": "Country-year-specimen-pathogen-antibiotic aggregate surveillance record (ecological level), NOT individual patient records.",
+  "intended_use": "Educational/methodological prototype for country-level AMR surveillance risk-pattern analysis. NOT for individual patient diagnosis or treatment.",
+  "training_data": {
+    "source": "World Health Organization. Global Antimicrobial Resistance and Use Surveillance System (GLASS) report: 2022. Geneva: WHO; 2022. Licence: CC BY-NC-SA 3.0 IGO. https://iris.who.int/handle/10665/364996 Row-level compilation: Quentin Leclerc, https://github.com/qleclerc/GLASS2022",
+    "n_samples": 6402,
+    "features": [
+      "CountryTerritoryArea",
+      "Specimen",
+      "PathogenName",
+      "AbTargets"
+    ],
+    "target": "resistant (binary: PercentResistant >= 20.0, investigator-defined threshold, NOT an official WHO risk category)",
+    "coverage_caveat": "Compilation includes only countries with continuous 2017-2020 data, plus separately all 2019 data; not a complete or fully representative sample of all WHO GLASS-enrolled countries."
+  },
+  "performance_single_holdout": {
+    "split": "single_holdout_test_size_0.3_random_state_42",
+    "n_train": 4481,
+    "n_test": 1921,
+    "accuracy": 0.9328474752732951,
+    "precision": 0.92992992992993,
+    "recall": 0.9402834008097166,
+    "f1_score": 0.9350780070457977,
+    "roc_auc": 0.9766371159161817,
+    "pr_auc": 0.9778743097183014,
+    "brier_score": 0.05282813310623169,
+    "confusion_matrix": [
+      [
+        863,
+        70
+      ],
+      [
+        59,
+        929
+      ]
+    ],
+    "classification_report": {
+      "Low Risk": {
+        "precision": 0.9360086767895879,
+        "recall": 0.92497320471597,
+        "f1-score": 0.9304582210242588,
+        "support": 933.0
+      },
+      "High Risk": {
+        "precision": 0.92992992992993,
+        "recall": 0.9402834008097166,
+        "f1-score": 0.9350780070457977,
+        "support": 988.0
+      },
+      "accuracy": 0.9328474752732951,
+      "macro avg": {
+        "precision": 0.9329693033597589,
+        "recall": 0.9326283027628433,
+        "f1-score": 0.9327681140350282,
+        "support": 1921.0
+      },
+      "weighted avg": {
+        "precision": 0.932882283297999,
+        "recall": 0.9328474752732951,
+        "f1-score": 0.9328342484002508,
+        "support": 1921.0
+      }
+    },
+    "model_type": "XGBClassifier",
+    "features_used": [
+      "CountryTerritoryArea",
+      "Specimen",
+      "PathogenName",
+      "AbTargets"
+    ],
+    "target_definition": "PercentResistant >= 20.0 (investigator-defined threshold)"
+  },
+  "performance_5fold_cv_mean_sd": {
+    "accuracy": {
+      "mean": 0.933302717603435,
+      "sd": 0.002973706383039693
+    },
+    "precision": {
+      "mean": 0.9347641359072881,
+      "sd": 0.00494544499848623
+    },
+    "recall": {
+      "mean": 0.9332570076516497,
+      "sd": 0.010172637204053554
+    },
+    "f1": {
+      "mean": 0.9339527419906005,
+      "sd": 0.0033592324564434726
+    },
+    "roc_auc": {
+      "mean": 0.9771232887695257,
+      "sd": 0.0018195857182418415
+    },
+    "pr_auc": {
+      "mean": 0.9784207961234287,
+      "sd": 0.002782026965662436
+    },
+    "brier": {
+      "mean": 0.05333072319626808,
+      "sd": 0.002665025047730122
+    }
+  },
+  "sanity_check_pathogen_antibiotic_majority_class_accuracy": 0.7970946579194002,
+  "limitations": [
+    "Aggregate, country-level surveillance data, not individual patient records; predictions describe surveillance-reporting combinations, not patients.",
+    "The 20% 'High Risk' threshold is investigator-defined, not an official WHO cutoff.",
+    "No age, gender, or other patient-level variables are present in this dataset.",
+    "Coverage caveat above applies; results should not be read as globally representative."
+  ],
+  "authors": [
+    "Chand Javed"
+  ]
+}
