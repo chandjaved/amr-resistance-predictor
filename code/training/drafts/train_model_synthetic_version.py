@@ -1,9 +1,4 @@
-"""
-train_model.py
-Trains an XGBoost classifier on the AMR synthetic dataset,
-performs hyperparameter tuning, handles class imbalance,
-and saves the model and encoders for later use in the Streamlit app.
-"""
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt

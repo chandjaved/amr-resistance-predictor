@@ -1,14 +1,4 @@
-"""
-generate_research_artifacts_CORRECTED.py — WHO GLASS 2022 real-data version
 
-Same leakage-free evaluation logic as the synthetic-data version (honest
-single split matching the real training split, PLUS 5-fold stratified CV),
-adapted to the real WHO GLASS 2022 schema: CountryTerritoryArea, Specimen,
-PathogenName, AbTargets -> resistant (PercentResistant >= HIGH_RISK_THRESHOLD).
-
-Run from inside code/evaluation/:
-    python generate_research_artifacts_CORRECTED.py
-"""
 import json
 import joblib
 import numpy as np
@@ -31,8 +21,8 @@ METRICS_DIR = "../../results/metrics"
 FIGURES_DIR = "../../results/figures"
 MODELS_DIR = "../../models"
 FEATURE_ORDER = ["CountryTerritoryArea", "Specimen", "PathogenName", "AbTargets"]
-HIGH_RISK_THRESHOLD = 20.0  # investigator-defined, not an official WHO cutoff
-BEST_PARAMS = dict(n_estimators=300, max_depth=7, learning_rate=0.1)  # from train_model.py's search
+HIGH_RISK_THRESHOLD = 20.0 
+BEST_PARAMS = dict(n_estimators=300, max_depth=7, learning_rate=0.1)  
 
 
 def load_data():

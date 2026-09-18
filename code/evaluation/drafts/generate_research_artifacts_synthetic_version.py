@@ -1,42 +1,4 @@
-"""
-generate_research_artifacts_CORRECTED.py
 
-WHY THIS FILE EXISTS
----------------------
-The original generate_research_artifacts.py evaluated prediction_model.pkl
-using train_test_split(..., stratify=y), while the model was actually
-TRAINED using train_test_split(...) WITHOUT stratify (same random_state,
-but stratify changes scikit-learn's internal shuffling, so it produces a
-different partition). The result: a large share of the "test" set in the
-original script had already been seen during training -> inflated metrics
-(91.3% accuracy / 0.961 ROC-AUC) that do not reflect real generalization.
-
-This script fixes that in two independent ways so the numbers you report
-are defensible under review:
-
-  (A) HONEST SINGLE SPLIT - retrains fresh, using the *exact* split logic
-      used in the real training run (train_model.py / amr_model.ipynb):
-      train_test_split(X, y, test_size=0.3, random_state=42) -- NO stratify,
-      NO reuse of a model that has seen the test rows. This reproduces the
-      genuine ~65% accuracy result.
-
-  (B) 5-FOLD STRATIFIED CROSS-VALIDATION - a more robust, reviewer-proof
-      estimate than any single 150-row split. Encoders and model are
-      refit inside each fold (no leakage across folds). Report mean +/- SD.
-
-Run this in an environment with xgboost and shap installed:
-    pip install xgboost shap scikit-learn pandas numpy matplotlib
-
-Outputs (all leakage-free):
-  metrics_corrected.json
-  roc_curve_corrected.png
-  pr_curve_corrected.png
-  confusion_matrix_corrected.png
-  calibration_curve_corrected.png
-  cv_metrics.json                 <- the numbers to actually put in the paper
-  shap_summary.png / shap_bar.png (if shap installed)
-  model_card_corrected.json
-"""
 import json
 import joblib
 import numpy as np
@@ -60,12 +22,7 @@ FIGURES_DIR = "../../results/figures"
 MODELS_DIR = "../../models"
 FEATURE_ORDER = ["age", "gender", "specimen", "organism", "antibiotic"]
 CATEGORICAL_COLS = ["gender", "specimen", "organism", "antibiotic"]
-
-# Hyperparameters found by the original RandomizedSearchCV
-# (amr_model.ipynb: {'n_estimators': 300, 'max_depth': 7, 'learning_rate': 0.1})
 BEST_PARAMS = dict(n_estimators=300, max_depth=7, learning_rate=0.1)
-
-
 def fit_encoders(df_train):
     encoders = {}
     for col in CATEGORICAL_COLS:
@@ -73,8 +30,6 @@ def fit_encoders(df_train):
         le.fit(df_train[col])
         encoders[col] = le
     return encoders
-
-
 def encode(df, encoders):
     X = df.copy()
     for col, le in encoders.items():
@@ -89,7 +44,6 @@ def make_model(y_train):
         scale_pos_weight=scale, **BEST_PARAMS
     )
 
-
 def part_a_honest_single_split(df):
     print("=" * 60)
     print("PART A - Honest single split (matches real training split)")
@@ -98,7 +52,7 @@ def part_a_honest_single_split(df):
     df_train, df_test = train_test_split(
         df, test_size=0.3, random_state=42  # NOTE: no stratify -- matches training code
     )
-    encoders = fit_encoders(df_train)  # fit ONLY on train -> no leakage
+    encoders = fit_encoders(df_train)  
     X_train = encode(df_train, encoders); y_train = df_train["resistant"]
     X_test = encode(df_test, encoders);  y_test = df_test["resistant"]
 
@@ -132,7 +86,7 @@ def part_a_honest_single_split(df):
     print(json.dumps({k: v for k, v in metrics.items()
                        if k not in ("classification_report", "confusion_matrix")}, indent=2))
 
-    # ROC
+  
     plt.figure(figsize=(5.5, 5))
     plt.plot(fpr, tpr, color="teal", lw=2, label=f"ROC-AUC = {roc_auc:.3f}")
     plt.plot([0, 1], [0, 1], "--", color="gray")
@@ -140,14 +94,14 @@ def part_a_honest_single_split(df):
     plt.title("ROC Curve (leakage-free)"); plt.legend(loc="lower right")
     plt.tight_layout(); plt.savefig(f"{FIGURES_DIR}/roc_curve_corrected.png", dpi=150); plt.close()
 
-    # PR
+  
     plt.figure(figsize=(5.5, 5))
     plt.plot(recall, precision, color="darkorange", lw=2, label=f"PR-AUC = {pr_auc:.3f}")
     plt.xlabel("Recall"); plt.ylabel("Precision")
     plt.title("Precision-Recall Curve (leakage-free)"); plt.legend(loc="lower left")
     plt.tight_layout(); plt.savefig(f"{FIGURES_DIR}/pr_curve_corrected.png", dpi=150); plt.close()
 
-    # Confusion matrix
+  
     plt.figure(figsize=(5, 4.5))
     plt.imshow(cm, cmap="Blues"); plt.title("Confusion Matrix (leakage-free)"); plt.colorbar()
     ticks = ["Sensitive", "Resistant"]; plt.xticks([0, 1], ticks); plt.yticks([0, 1], ticks)
@@ -158,7 +112,7 @@ def part_a_honest_single_split(df):
     plt.xlabel("Predicted"); plt.ylabel("Actual")
     plt.tight_layout(); plt.savefig(f"{FIGURES_DIR}/confusion_matrix_corrected.png", dpi=150); plt.close()
 
-    # Calibration
+
     frac_pos, mean_pred = calibration_curve(y_test, y_proba, n_bins=8, strategy="quantile")
     plt.figure(figsize=(5.5, 5))
     plt.plot(mean_pred, frac_pos, "o-", color="#14213D", lw=2, label="Model")
@@ -167,7 +121,7 @@ def part_a_honest_single_split(df):
     plt.title(f"Calibration Curve (Brier = {brier:.3f})"); plt.legend(loc="upper left")
     plt.tight_layout(); plt.savefig(f"{FIGURES_DIR}/calibration_curve_corrected.png", dpi=150); plt.close()
 
-    # SHAP (global, from this honest fit)
+
     try:
         import shap
         explainer = shap.TreeExplainer(model)
