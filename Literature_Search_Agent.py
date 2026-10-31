@@ -1,7 +1,6 @@
 #Day 1: Literature Search Agent
 from dataclasses import dataclass, field
 from typing import List, Dict
-python -m pip install pydantic
 
 @dataclass
 class AgentState:
